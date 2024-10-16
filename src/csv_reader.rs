@@ -1,4 +1,3 @@
-use std::env;
 use std::fs::read_to_string;
 
 pub fn extract_from_csv(filename: String, column: String) -> Vec<String> {
