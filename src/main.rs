@@ -37,12 +37,12 @@ fn load_trie(filename: String) -> Trie {
 fn main() {
     let trie = create_trie_from_csv_file("./res/ngram_freq_dict.csv".to_string(), "word".to_string());
     
-    // save_trie(trie, "./serialzed_files/ngram".to_string());
-    // let trie = load_trie("./serialzed_files/ngram".to_string());
+    save_trie(trie, "./serialized_files/ngram".to_string());
+    // let trie = load_trie("./serialized_files/ngram".to_string());
     
-    for word in trie.get_suggested_words("t".to_string(), 5) {
-        println!("{}", word);
-    }
+    // for word in trie.get_suggested_words("t".to_string(), 5) {
+    //     println!("{}", word);
+    // }
 }
 
 

@@ -4,6 +4,31 @@ use serde::{Serialize, Deserialize};
 use std::fs::File;
 use std::fmt;
 
+
+// Database support ------------------------------------------------------
+// use sqlite::Error as sqErr;
+
+// #[derive(Debug)]
+// pub enum TrieErr {
+//     DbErr(sqErr),
+// }
+
+// impl From<sqErr> for TrieErr {
+//     fn from(value: sqErr) -> Self {
+//         TrieErr::DbErr(s)
+//     }
+// }
+
+// -----------------------------------------------------------------------
+
+
+
+// Database support ------------------------------------------------------
+extern crate rusqlite;
+
+use rusqlite::{Connection, Result};
+// -----------------------------------------------------------------------
+
 const INVALID: i32 = -1;
 
 #[derive(Serialize, Deserialize)]
@@ -216,10 +241,38 @@ impl fmt::Display for Trie {
 }
 
 
-pub fn serialize_trie(trie: Trie, filename: String) {
-    let file = File::create(filename).unwrap();
-    let _ = serde_bare::to_writer(&file, &trie);
-    // file.write(serialized.as_bytes());
+pub fn serialize_trie(trie: Trie, filename: String) -> Result<()> {
+    // let file = File::create(filename).unwrap();
+    // let _ = serde_bare::to_writer(&file, &trie);
+
+    // let connection = sqlite::open("./common_words.db");
+    let connection = Connection::open("./common_words.db")?;
+
+    connection.execute(
+        "drop table if exists common_words",
+        (),
+    )?;
+
+    connection.execute(
+        "create table if not exists common_words (
+            id integer primary key,
+            node_data text not null
+        )",
+        ()
+    )?;
+
+    // This insersts the hash table into the database
+    for (id, node) in trie.data {
+        let serialized_node = serde_json::to_string(&node).unwrap();
+
+        connection.execute(
+            "insert into common_words (id, node_data)
+            values (?1, ?2)",
+            &[&id.to_string(), &serialized_node.to_string()]
+        )?;
+    }
+
+    Ok(())
 }
 
 pub fn deserialize_trie(filename: String) -> Trie {
