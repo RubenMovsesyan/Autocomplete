@@ -27,7 +27,7 @@ fn main() {
     //     trie.add_word(word);
     // }
 
-    let filename = String::from("./serialized_files/english_words.json");
+    let filename = String::from("./serialized_files/english_words");
 
     // println!("Extraction complete, Serializing and saving to {}", filename);
 
@@ -38,6 +38,7 @@ fn main() {
     // println!("Trie generated with {} nodes, Running autocomplete on: {}", trie.get_size(), current_word);
     let now = Instant::now();
     println!("Extracting from serialized tree...");
+    let now = Instant::now();
     let trie = deserialize_trie(filename);
     println!("Extraction complete, took {:.2?}", now.elapsed());
     
@@ -46,6 +47,8 @@ fn main() {
         println!("{}", word);
     }
 }
+
+
 
 #[cfg(test)]
 mod tests {
