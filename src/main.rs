@@ -1,4 +1,5 @@
 // use std::collections::HashMap;
+use std::time::Instant;
 
 mod trie;
 mod csv_reader;
@@ -35,10 +36,10 @@ fn main() {
     // let current_word = String::from("menag");
 
     // println!("Trie generated with {} nodes, Running autocomplete on: {}", trie.get_size(), current_word);
-    
+    let now = Instant::now();
     println!("Extracting from serialized tree...");
     let trie = deserialize_trie(filename);
-    println!("Extraction complete");
+    println!("Extraction complete, took {:.2?}", now.elapsed());
     
     
     for word in trie.get_suggested_words("menag".to_string(), 5) {
