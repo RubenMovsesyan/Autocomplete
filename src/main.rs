@@ -18,32 +18,37 @@ fn main() {
     // trie.add_word(String::from("top"));
 
     // println!("{}", trie);
+    let filename = String::from("./serialized_files/n_gram");
 
-    // println!("Extracting contents...");
-    // let contents = extract_from_csv("./res/words_pos.csv".to_string(), "word".to_string());
-    // println!("Contents Extracted, Adding to Trie...");
-    // for word in contents {
-    //     // println!("{}", word);
-    //     trie.add_word(word);
-    // }
+    println!("Extracting contents...");
+    let mut contents = extract_from_csv("./res/ngram_freq_dict.csv".to_string(), "word".to_string());
+    // contents.reverse();
+    println!("Contents Extracted, Adding to Trie...");
+    for word in contents {
+        // println!("{}", word);
+        trie.add_word(word);
+    }
 
-    let filename = String::from("./serialized_files/english_words");
 
-    // println!("Extraction complete, Serializing and saving to {}", filename);
+    // println!("Trie generation complete, Serializing and saving to {}", filename);
 
     // serialize_trie(trie, filename);
     // println!("Serialization complete");
+
+
     // let current_word = String::from("menag");
 
     // println!("Trie generated with {} nodes, Running autocomplete on: {}", trie.get_size(), current_word);
-    let now = Instant::now();
-    println!("Extracting from serialized tree...");
-    let now = Instant::now();
-    let trie = deserialize_trie(filename);
-    println!("Extraction complete, took {:.2?}", now.elapsed());
+
+
+    // let now = Instant::now();
+    // println!("Extracting from serialized tree...");
+    // let now = Instant::now();
+    // let trie = deserialize_trie(filename);
+    // println!("Extraction complete, took {:.2?}", now.elapsed());
     
     
-    for word in trie.get_suggested_words("menag".to_string(), 5) {
+    for word in trie.get_suggested_words("t".to_string(), 5) {
         println!("{}", word);
     }
 }
