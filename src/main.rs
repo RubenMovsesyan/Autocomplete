@@ -20,16 +20,16 @@ fn main() {
     // println!("{}", trie);
     let filename = String::from("./serialized_files/n_gram");
 
-    println!("Extracting contents...");
-    let mut contents = extract_from_csv("./res/ngram_freq_dict.csv".to_string(), "word".to_string());
-    // contents.reverse();
-    println!("Contents Extracted, Adding to Trie...");
-    for word in contents {
-        // println!("{}", word);
-        trie.add_word(word);
-    }
+    // println!("Extracting contents...");
+    // let mut contents = extract_from_csv("./res/ngram_freq_dict.csv".to_string(), "word".to_string());
+    // // contents.reverse();
+    // println!("Contents Extracted, Adding to Trie...");
+    // for word in contents {
+    //     // println!("{}", word);
+    //     trie.add_word(word);
+    // }
 
-    let filename = String::from("./serialized_files/english_words");
+    // let filename = String::from("./serialized_files/english_words");
 
     // println!("Trie generation complete, Serializing and saving to {}", filename);
 
