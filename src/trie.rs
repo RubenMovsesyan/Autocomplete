@@ -213,17 +213,16 @@ impl fmt::Display for Trie {
 
 
 pub fn serialize_trie(trie: Trie, filename: String) {
-    let serialized = serde_json::to_string(&trie).unwrap();
-
-    let mut file = File::create(filename).unwrap();
-
-    file.write(serialized.as_bytes());
+    let file = File::create(filename).unwrap();
+    let _ = serde_bare::to_writer(&file, &trie);
+    // file.write(serialized.as_bytes());
 }
 
 pub fn deserialize_trie(filename: String) -> Trie {
     // TODO implement error handling
-    let mut contents: String = Default::default();
-    let _ = File::open(filename).unwrap().read_to_string(&mut contents);
+    // let mut contents: String = Default::default();
+    let file = File::open(filename).unwrap();
 
-    serde_json::from_str(&contents).unwrap()
+    // serde_json::from_str(&contents).unwrap()
+    serde_bare::from_reader(&file).unwrap()
 }
