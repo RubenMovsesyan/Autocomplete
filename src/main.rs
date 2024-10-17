@@ -3,7 +3,7 @@
 mod trie;
 mod csv_reader;
 use csv_reader::extract_from_csv;
-use trie::Trie;
+use trie::{serialize_trie, deserialize_trie, Trie};
 
 fn main() {
     let mut trie = Trie::new();
@@ -18,18 +18,30 @@ fn main() {
 
     // println!("{}", trie);
 
-    println!("Extracting contents...");
-    let contents = extract_from_csv("./res/words_pos.csv".to_string(), "word".to_string());
-    println!("Contents Extracted, Adding to Trie...");
-    for word in contents {
-        // println!("{}", word);
-        trie.add_word(word);
-    }
-    let current_word = String::from("menag");
+    // println!("Extracting contents...");
+    // let contents = extract_from_csv("./res/words_pos.csv".to_string(), "word".to_string());
+    // println!("Contents Extracted, Adding to Trie...");
+    // for word in contents {
+    //     // println!("{}", word);
+    //     trie.add_word(word);
+    // }
 
-    println!("Trie generated with {} nodes, Running autocomplete on: {}", trie.get_size(), current_word);
+    let filename = String::from("./serialized_files/english_words.json");
+
+    // println!("Extraction complete, Serializing and saving to {}", filename);
+
+    // serialize_trie(trie, filename);
+    // println!("Serialization complete");
+    // let current_word = String::from("menag");
+
+    // println!("Trie generated with {} nodes, Running autocomplete on: {}", trie.get_size(), current_word);
     
-    for word in trie.get_suggested_words(current_word, 5) {
+    println!("Extracting from serialized tree...");
+    let trie = deserialize_trie(filename);
+    println!("Extraction complete");
+    
+    
+    for word in trie.get_suggested_words("menag".to_string(), 5) {
         println!("{}", word);
     }
 }

@@ -1,14 +1,19 @@
 use std::collections::HashMap;
+use std::io::{Read, Write};
+use serde::{Serialize, Deserialize};
+use std::fs::File;
 use std::fmt;
 
 const INVALID: i32 = -1;
 
+#[derive(Serialize, Deserialize)]
 enum TrieNode {
     Incomplete { node: Node },
     Complete { node: Node, word: String },
 }
 
 // Node implementation to work with rust hashmaps
+#[derive(Serialize, Deserialize)]
 struct Node {
     data: char,
     children: Vec<i32>,
@@ -48,6 +53,7 @@ impl Node {
 }
 
 // Trie implementation that uses hashmaps to store node information instead of references
+#[derive(Serialize, Deserialize)]
 pub struct Trie {
     data: HashMap<i32, TrieNode>,
     current_size: i32,
@@ -56,7 +62,6 @@ pub struct Trie {
 impl Trie {
     pub fn new() -> Self {
         let mut hash_map: HashMap<i32, TrieNode> = HashMap::new();
-        // let root = Node::new(' ');
         let root = TrieNode::Incomplete {
             node: Node::new(' ')
         };
@@ -204,4 +209,21 @@ impl fmt::Display for Trie {
             writeln!(f)?;
         })
     }
+}
+
+
+pub fn serialize_trie(trie: Trie, filename: String) {
+    let serialized = serde_json::to_string(&trie).unwrap();
+
+    let mut file = File::create(filename).unwrap();
+
+    file.write(serialized.as_bytes());
+}
+
+pub fn deserialize_trie(filename: String) -> Trie {
+    // TODO implement error handling
+    let mut contents: String = Default::default();
+    let _ = File::open(filename).unwrap().read_to_string(&mut contents);
+
+    serde_json::from_str(&contents).unwrap()
 }
