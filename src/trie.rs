@@ -218,8 +218,7 @@ impl fmt::Display for Trie {
 
 pub fn serialize_trie(trie: Trie, filename: String) {
     let file = File::create(filename).unwrap();
-    let _ = serde_bare::to_writer(&file, &trie);
-    // file.write(serialized.as_bytes());
+    let _ = serde_bare::to_writer(&file, &trie.data);
 }
 
 pub fn deserialize_trie(filename: String) -> Trie {
@@ -228,5 +227,9 @@ pub fn deserialize_trie(filename: String) -> Trie {
     let file = File::open(filename).unwrap();
 
     // serde_json::from_str(&contents).unwrap()
-    serde_bare::from_reader(&file).unwrap()
+    let hashmap: HashMap<i32, TrieNode> = serde_bare::from_reader(&file).unwrap();
+    Trie {
+        current_size: hashmap.keys().len() as i32,
+        data: hashmap,
+    }
 }

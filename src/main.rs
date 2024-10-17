@@ -8,13 +8,14 @@ use trie::{serialize_trie, deserialize_trie, Trie};
 fn create_trie_from_csv_file(filename: String, column_name: String) -> Trie {
     println!("Extracting from {}...", filename);
     let mut trie = Trie::new();
+    let now = Instant::now();
     let mut contents = extract_from_csv(filename, column_name);
 
     for word in contents {
         trie.add_word(word);
     }
     
-    println!("Contents extracted, trie generated");
+    println!("Contents extracted, trie generated in {:.2?}", now.elapsed());
 
     trie
 }
@@ -35,10 +36,10 @@ fn load_trie(filename: String) -> Trie {
 }
 
 fn main() {
-    let trie = create_trie_from_csv_file("./res/ngram_freq_dict.csv".to_string(), "word".to_string());
+    // let trie = create_trie_from_csv_file("./res/ngram_freq_dict.csv".to_string(), "word".to_string());
     
-    // save_trie(trie, "./serialzed_files/ngram".to_string());
-    // let trie = load_trie("./serialzed_files/ngram".to_string());
+    // save_trie(trie, "./serialized_files/ngram".to_string());
+    let trie = load_trie("./serialized_files/ngram".to_string());
     
     for word in trie.get_suggested_words("t".to_string(), 5) {
         println!("{}", word);
