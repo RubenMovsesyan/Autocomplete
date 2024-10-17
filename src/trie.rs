@@ -93,7 +93,7 @@ impl Trie {
             // If the character is not a child of the current node then add it, otherwise move on to
             // the child and get the next character
             let node_with_character = self.check_for_character(current_node, character);
-
+            
             if node_with_character == INVALID {
                 let new_node = Node::new(character);
                 let node_to_add: TrieNode;
@@ -114,6 +114,8 @@ impl Trie {
             } else {
                 current_node = node_with_character;
             }
+
+            // println!("{}", self);
         }
     }
 
@@ -159,7 +161,9 @@ impl Trie {
                 .get_node()
                 .get_children();
 
-            for child in children {
+            for child in children
+                .iter()
+                .rev() { // Get rid of this line to make it work based on the least popular words
                 if !visited.contains(child) {
                     stack.push(*child);
                 }
