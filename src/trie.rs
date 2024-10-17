@@ -52,6 +52,13 @@ impl Node {
     }
 }
 
+
+pub struct AutoCompleteMemory {
+    pub word: String,
+    pub node_ids: Vec<i32>,
+}
+
+
 // Trie implementation that uses hashmaps to store node information instead of references
 #[derive(Serialize, Deserialize)]
 pub struct Trie {
@@ -127,12 +134,17 @@ impl Trie {
         self.data.get(&node_id).unwrap()
     }
 
-    pub fn get_suggested_words(&self, current_word: String, amount: i32) -> Vec<String> {
+    pub fn get_suggested_words(&self, current_word: &mut AutoCompleteMemory, amount: i32) -> Vec<String> {
         let mut suggested_words: Vec<String> = Vec::new();
 
         let mut current_node = 0;
 
-        for letter in current_word.chars() {
+        // If the trie traversal has already been calculated then go to that node
+        if current_word.node_ids.len() > 0 {
+            current_node = *current_word.node_ids.last().unwrap();
+        }
+
+        for letter in current_word.word[current_word.node_ids.len()..].chars() {
             let node_with_character = self.check_for_character(current_node, letter);
 
             if node_with_character == -1 {
@@ -140,6 +152,7 @@ impl Trie {
             }
 
             current_node = node_with_character;
+            current_word.node_ids.push(current_node);
         }
 
         // Depth first search
