@@ -1,19 +1,22 @@
-use std::collections::{HashMap, LinkedList};
+use std::collections::HashMap;
+use std::io::{Read, Write};
+use serde::{Serialize, Deserialize};
+use std::fs::File;
 use std::fmt;
 
 const INVALID: i32 = -1;
-const END_WORD: i32 = -2;
 
+#[derive(Serialize, Deserialize)]
 enum TrieNode {
     Incomplete { node: Node },
     Complete { node: Node, word: String },
 }
 
 // Node implementation to work with rust hashmaps
+#[derive(Serialize, Deserialize)]
 struct Node {
     data: char,
     children: Vec<i32>,
-    is_complete: bool,
 }
 
 impl TrieNode {
@@ -41,32 +44,16 @@ impl Node {
         Self {
             data: value,
             children: Vec::new(),
-            is_complete: false,
         }
-    }
-
-    fn add_child(&mut self, id: i32) {
-        self.children.push(id);
     }
 
     fn get_children(&self) -> &Vec<i32> {
         &self.children
     }
-
-    fn get_value(&self) -> char {
-        self.data
-    }
-
-    fn set_complete(&mut self, value: bool) {
-        self.is_complete = value;
-    }
-
-    fn is_complete(&self) -> bool {
-        self.is_complete
-    }
 }
 
 // Trie implementation that uses hashmaps to store node information instead of references
+#[derive(Serialize, Deserialize)]
 pub struct Trie {
     data: HashMap<i32, TrieNode>,
     current_size: i32,
@@ -75,7 +62,6 @@ pub struct Trie {
 impl Trie {
     pub fn new() -> Self {
         let mut hash_map: HashMap<i32, TrieNode> = HashMap::new();
-        // let root = Node::new(' ');
         let root = TrieNode::Incomplete {
             node: Node::new(' ')
         };
@@ -85,21 +71,6 @@ impl Trie {
             current_size: 0,
         }
     }
-
-    // fn check_for_character(&self, current_node: i32, character: char) -> i32 {
-    //     let parent_node = self.data.get(&current_node).unwrap();
-
-    //     // Check each child for the character defined
-    //     for node_id in parent_node.children.iter() {
-    //         let check_node = self.data.get(node_id).unwrap();
-    //         if check_node.data == character {
-    //             return node_id.clone();
-    //         }
-    //     }
-
-    //     // If the character is not in the children nodes return INVALID
-    //     INVALID
-    // }
 
     fn check_for_character(&self, current_node: i32, character: char) -> i32 {
         let parent_node = self.data.get(&current_node).unwrap();
@@ -121,10 +92,9 @@ impl Trie {
         for (index, character) in word.char_indices() {
             // If the character is not a child of the current node then add it, otherwise move on to
             // the child and get the next character
-
             let node_with_character = self.check_for_character(current_node, character);
 
-            if node_with_character == -1 {
+            if node_with_character == INVALID {
                 let new_node = Node::new(character);
                 let node_to_add: TrieNode;
                 // Add the proper node type based on if the word is complete or not
@@ -147,39 +117,8 @@ impl Trie {
         }
     }
 
-    // pub fn add_word(&mut self, word: String) {
-    //     let mut current_node = 0; // This is the root node id always
-
-    //     for (index, character) in word.char_indices() {
-    //         // If the character is not a child of the current node then add it, otherwise move on to
-    //         // the child and get the next character
-    //         let node_with_character = self.check_for_character(current_node, character);
-
-    //         if node_with_character == -1 {
-    //             let new_node = Node::new(character);
-    //             self.current_size += 1;
-    //             self.data
-    //                 .get_mut(&current_node)
-    //                 .unwrap()
-    //                 .add_child(self.current_size);
-    //             current_node = self.current_size;
-    //             self.data.insert(self.current_size, new_node);
-    //         } else {
-    //             current_node = node_with_character;
-    //         }
-
-    //         if index == word.len() - 1 {
-    //             self.data.get_mut(&current_node).unwrap().set_complete(true);
-    //         }
-    //     }
-    // }
-
     pub fn get_size(&self) -> i32 {
         self.current_size
-    }
-
-    fn get_node(&self, node_id: i32) -> &Node {
-        self.data.get(&node_id).unwrap().get_node()
     }
 
     fn get_trie_node(&self, node_id: i32) -> &TrieNode {
@@ -239,8 +178,9 @@ impl Trie {
 
 // This is to make debugging easier
 impl fmt::Display for Trie {
-    fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        println!("   ID   | value |          word          | Children");
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "   ID   | value |          word          | Children")?;
+        writeln!(f, "________|_______|________________________|_________")?;
         Ok(for (id, value) in &self.data {
             let val: String;
             let mut word_to_print = String::from("");
@@ -254,18 +194,35 @@ impl fmt::Display for Trie {
                     word_to_print = word.clone();
                 }, 
             }
-            print!(
-                "{:>8}|{:>5}  |{:>24}|",
+            write!(
+                f,
+                "{:>8}|{:>5}  |{:^24}|",
                 id,
                 val,
                 word_to_print
-            );
+            )?;
 
 
             for child in value.get_node().children.iter() {
-                print!("{}, ", child);
+                write!(f, "{}, ", child)?;
             }
-            println!();
+            writeln!(f)?;
         })
     }
+}
+
+
+pub fn serialize_trie(trie: Trie, filename: String) {
+    let file = File::create(filename).unwrap();
+    let _ = serde_bare::to_writer(&file, &trie);
+    // file.write(serialized.as_bytes());
+}
+
+pub fn deserialize_trie(filename: String) -> Trie {
+    // TODO implement error handling
+    // let mut contents: String = Default::default();
+    let file = File::open(filename).unwrap();
+
+    // serde_json::from_str(&contents).unwrap()
+    serde_bare::from_reader(&file).unwrap()
 }
