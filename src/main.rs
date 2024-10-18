@@ -1,21 +1,26 @@
 use std::time::Instant;
 
-mod trie;
 mod csv_reader;
+mod trie;
 use csv_reader::extract_from_csv;
-use trie::{serialize_trie, deserialize_trie, Trie};
+use trie::{deserialize_trie, serialize_trie, AutoCompleteMemory, Trie};
+
+const NUM_BENCHMARKS: i32 = 500;
 
 fn create_trie_from_csv_file(filename: String, column_name: String) -> Trie {
     println!("Extracting from {}...", filename);
     let mut trie = Trie::new();
     let now = Instant::now();
-    let mut contents = extract_from_csv(filename, column_name);
+    let contents = extract_from_csv(filename, column_name);
 
     for word in contents {
         trie.add_word(word);
     }
-    
-    println!("Contents extracted, trie generated in {:.2?}", now.elapsed());
+
+    println!(
+        "Contents extracted, trie generated in {:.2?}",
+        now.elapsed()
+    );
 
     trie
 }
@@ -35,18 +40,97 @@ fn load_trie(filename: String) -> Trie {
     trie
 }
 
-fn main() {
-    let trie = create_trie_from_csv_file("./res/ngram_freq_dict.csv".to_string(), "word".to_string());
-    
-    // save_trie(trie, "./serialized_files/ngram".to_string());
-    // let trie = load_trie("./serialized_files/ngram".to_string());
-    
-    for word in trie.get_suggested_words("t".to_string(), 5) {
-        println!("{}", word);
+fn benchmark_speed_with_memory(trie: &Trie, benchmark_times: i32) {
+    let mut iteration_1_avg = 0;
+    let mut iteration_2_avg = 0;
+    let mut iteration_3_avg = 0;
+
+    println!("Running {} tests with memory...", benchmark_times);
+    let test_now = Instant::now();
+    for i in 1..=benchmark_times {
+        let mut current_word = AutoCompleteMemory::from_string(String::from("unbend"));
+
+        let now = Instant::now();
+        let _ = trie.get_suggested_words(&mut current_word, 5);
+        iteration_1_avg += now.elapsed().as_nanos() as i64;
+        iteration_1_avg /= i as i64;
+
+        current_word.update(String::from("unbendi"));
+
+        let now = Instant::now();
+        let _ = trie.get_suggested_words(&mut current_word, 5);
+        iteration_2_avg += now.elapsed().as_nanos() as i64;
+        iteration_2_avg /= i as i64;
+
+        current_word.update(String::from("unbendin"));
+
+        let now = Instant::now();
+        let _ = trie.get_suggested_words(&mut current_word, 5);
+        iteration_3_avg += now.elapsed().as_nanos() as i64;
+        iteration_3_avg /= i as i64;
     }
+
+    println!(
+        "Ran {} tests in {:.2?}",
+        benchmark_times,
+        test_now.elapsed()
+    );
+    println!("    Iteration 1 avg: {}ns", iteration_1_avg);
+    println!("    Iteration 2 avg: {}ns", iteration_2_avg);
+    println!("    Iteration 3 avg: {}ns", iteration_3_avg);
 }
 
+fn benchmark_speed_without_memory(trie: &Trie, benchmark_times: i32) {
+    let mut iteration_1_avg = 0;
+    let mut iteration_2_avg = 0;
+    let mut iteration_3_avg = 0;
 
+    println!("Running {} tests without memory...", benchmark_times);
+    let test_now = Instant::now();
+    for i in 1..=benchmark_times {
+        let mut current_word = AutoCompleteMemory::from_string(String::from("unbend"));
+
+        let now = Instant::now();
+        let _ = trie.get_suggested_words(&mut current_word, 5);
+        iteration_1_avg += now.elapsed().as_nanos() as i64;
+        iteration_1_avg /= i as i64;
+
+        current_word.update_and_reset(String::from("unbendi"));
+
+        let now = Instant::now();
+        let _ = trie.get_suggested_words(&mut current_word, 5);
+        iteration_2_avg += now.elapsed().as_nanos() as i64;
+        iteration_2_avg /= i as i64;
+
+        current_word.update_and_reset(String::from("unbendin"));
+
+        let now = Instant::now();
+        let _ = trie.get_suggested_words(&mut current_word, 5);
+        iteration_3_avg += now.elapsed().as_nanos() as i64;
+        iteration_3_avg /= i as i64;
+    }
+
+    println!(
+        "Ran {} tests in {:.2?}",
+        benchmark_times,
+        test_now.elapsed()
+    );
+    println!("    Iteration 1 avg: {}ns", iteration_1_avg);
+    println!("    Iteration 2 avg: {}ns", iteration_2_avg);
+    println!("    Iteration 3 avg: {}ns", iteration_3_avg);
+}
+
+fn main() {
+    let trie =
+        create_trie_from_csv_file("./res/ngram_freq_dict.csv".to_string(), "word".to_string());
+
+    // save_trie(trie, "./serialized_files/ngram".to_string());
+
+    // let trie = load_trie("./serialized_files/ngram".to_string());
+
+    benchmark_speed_with_memory(&trie, NUM_BENCHMARKS);
+    benchmark_speed_without_memory(&trie, NUM_BENCHMARKS);
+}
 
 #[cfg(test)]
 mod tests {
