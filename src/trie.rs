@@ -54,10 +54,62 @@ impl Node {
 
 
 pub struct AutoCompleteMemory {
-    pub word: String,
-    pub node_ids: Vec<i32>,
+    word: String,
+    node_ids: Vec<i32>,
 }
 
+
+impl AutoCompleteMemory {
+    pub fn new() -> Self {
+        Self {
+            word: String::new(),
+            node_ids: Vec::new(),
+        }
+    }
+
+    pub fn from_string(string: String) -> Self {
+        Self {
+            word: string,
+            node_ids: Vec::new(),
+        }
+    }
+
+    // Updates the AutoCompleteMemory
+    // If the new string is an extension of the word it keeps the memory
+    // If the new string is a different word it gets rid of the memory
+    // This is not that big a deal because in my testing it really only
+    // makes a difference of 2ns (which is negligible in this application)
+    pub fn update(&mut self, updated_string: String) {
+        if !updated_string.contains(&self.word) {
+            self.node_ids.clear();
+        }
+        self.word = updated_string;
+    }
+
+    // Returns copy of the word
+    pub fn get_word(&self) -> String {
+        self.word.clone()
+    }
+
+    // Returns a reference to the node ids
+    pub fn get_node_ids(&self) -> &Vec<i32> {
+        &self.node_ids
+    }
+
+    pub fn push_node_id(&mut self, node_id: i32) {
+        self.node_ids.push(node_id);
+    }
+
+    // This is mostly just used for testing
+    pub fn reset_node_ids(&mut self) {
+        self.node_ids.clear();
+    }
+
+    pub fn update_and_reset(&mut self, updated_string: String) {
+        self.word = updated_string;
+        self.node_ids.clear();
+    }
+}
 
 // Trie implementation that uses hashmaps to store node information instead of references
 #[derive(Serialize, Deserialize)]
@@ -140,11 +192,11 @@ impl Trie {
         let mut current_node = 0;
 
         // If the trie traversal has already been calculated then go to that node
-        if current_word.node_ids.len() > 0 {
-            current_node = *current_word.node_ids.last().unwrap();
+        if current_word.get_node_ids().len() > 0 {
+            current_node = *current_word.get_node_ids().last().unwrap();
         }
 
-        for letter in current_word.word[current_word.node_ids.len()..].chars() {
+        for letter in current_word.get_word()[current_word.get_node_ids().len()..].chars() {
             let node_with_character = self.check_for_character(current_node, letter);
 
             if node_with_character == -1 {
@@ -152,7 +204,7 @@ impl Trie {
             }
 
             current_node = node_with_character;
-            current_word.node_ids.push(current_node);
+            current_word.push_node_id(current_node);
         }
 
         // Depth first search
