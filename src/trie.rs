@@ -1,19 +1,19 @@
 use std::collections::HashMap;
 use std::io::{Read, Write};
-use serde::{Serialize, Deserialize};
+// use serde::{Serialize, Deserialize};
 use std::fs::File;
 use std::fmt;
 
 const INVALID: i32 = -1;
 
-#[derive(Serialize, Deserialize)]
+// #[derive(Serialize, Deserialize)]
 enum TrieNode {
     Incomplete { node: Node },
     Complete { node: Node, word: String },
 }
 
 // Node implementation to work with rust hashmaps
-#[derive(Serialize, Deserialize)]
+// #[derive(Serialize, Deserialize)]
 struct Node {
     data: char,
     children: Vec<i32>,
@@ -112,7 +112,7 @@ impl AutoCompleteMemory {
 }
 
 // Trie implementation that uses hashmaps to store node information instead of references
-#[derive(Serialize, Deserialize)]
+// #[derive(Serialize, Deserialize)]
 pub struct Trie {
     data: HashMap<i32, TrieNode>,
     current_size: i32,
@@ -207,6 +207,10 @@ impl Trie {
             current_word.push_node_id(current_node);
         }
 
+        if current_node == 0 {
+            return suggested_words;
+        }
+
         // Depth first search
         let mut visited: Vec<i32> = Vec::new();
         let mut stack: Vec<i32> = Vec::new();
@@ -228,7 +232,8 @@ impl Trie {
 
             for child in children
                 .iter()
-                .rev() { // Get rid of this line to make it work based on the least popular words
+                // .rev()  // Get rid of this line to make it work based on the least popular words
+                {
                 if !visited.contains(child) {
                     stack.push(*child);
                 }
@@ -281,17 +286,17 @@ impl fmt::Display for Trie {
 }
 
 
-pub fn serialize_trie(trie: Trie, filename: String) {
-    let file = File::create(filename).unwrap();
-    let _ = serde_bare::to_writer(&file, &trie);
-    // file.write(serialized.as_bytes());
-}
+// pub fn serialize_trie(trie: Trie, filename: String) {
+//     let file = File::create(filename).unwrap();
+//     let _ = serde_bare::to_writer(&file, &trie);
+//     // file.write(serialized.as_bytes());
+// }
 
-pub fn deserialize_trie(filename: String) -> Trie {
-    // TODO implement error handling
-    // let mut contents: String = Default::default();
-    let file = File::open(filename).unwrap();
+// pub fn deserialize_trie(filename: String) -> Trie {
+//     // TODO implement error handling
+//     // let mut contents: String = Default::default();
+//     let file = File::open(filename).unwrap();
 
-    // serde_json::from_str(&contents).unwrap()
-    serde_bare::from_reader(&file).unwrap()
-}
+//     // serde_json::from_str(&contents).unwrap()
+//     serde_bare::from_reader(&file).unwrap()
+// }

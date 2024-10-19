@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="styles.css" />
+        <title>Really Bad Autocomplete</title>
+    </head>
+    <body>
+        <div class="background">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <!-- <div id="autocomplete-bounding-box"> -->
+        <div id="autocomplete-container">
+            <textarea
+                id="autocomplete-input"
+                rows="1"
+                spellcheck="false"
+            ></textarea>
+            <div id="autocomplete-text-show"></div>
+        </div>
+        <!-- </div> -->
+
+        <label class="hamburger-menu">
+            <input type="checkbox" />
+        </label>
+        <div class="sidebar">
+            <nav id="sidebar-nav">
+                <div id="sidebar-description">
+                    <h1 id="sidebar-title">Really Bad Autocomplete</h1>
+                    <p class="description-text">
+                        Do you ever wish that autocomplete would suggest the
+                        least likely word that you will in any given situation?
+                        Me neither, but here is an autocomplete engine written
+                        in rust that will do exactly that. For every word you
+                        type in, it will autocomplete it with the least likely
+                        word that you will use.
+                    </p>
+                    <br>
+                    <p class="description-text">
+                        This project was written in rust and compiled to
+                        WebAssembly.
+                    </p>
+                </div>
+            </nav>
+            <div id="github-text">
+                <h2 id="find-on-github-text">
+                    Find the source code on github here:
+                </h2>
+                <a id="github-link"
+                        href="https://github.com/RubenMovsesyan/Autocomplete.git"
+                    >
+                        <img
+                            src="https://img.icons8.com/ios_filled/200/FFFFFF/github.png"
+                        />
+                        <img id="github-glow"
+                            src="https://img.icons8.com/ios_filled/200/FFFFFF/github.png"
+                        />
+                    </a>
+            </div>
+        </div>
+
+        <script type="module" src="./index.js"></script>
+    </body>
+</html>
